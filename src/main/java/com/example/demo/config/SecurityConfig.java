@@ -12,25 +12,34 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import com.example.demo.service.implementation.UserDetailServiceImpl;
 
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-	
+
 	private final UserDetailServiceImpl userDetailServiceImpl;
     
-	@Autowired
-    public SecurityConfig(UserDetailServiceImpl userDetailServiceImpl) {
+	public SecurityConfig(UserDetailServiceImpl userDetailServiceImpl) {
 		this.userDetailServiceImpl = userDetailServiceImpl;
 	}
 
+	@Bean
+	public CustomConfigClass logoutHandler() {
+			return new CustomConfigClass();
+	}
+	
+	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
 		return new JwtAuthenticationFilter();
 	}
@@ -60,8 +69,13 @@ public class SecurityConfig {
     	http .csrf().disable()
     		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
     		.authorizeRequests()
-    		.antMatchers("/api/login", "/api/register").permitAll()
-    		.anyRequest().authenticated();
+    		.antMatchers("/api/auth/login", "/api/auth/register").permitAll()
+    		.anyRequest().authenticated()
+    		.and()
+    			.logout((logout) -> logout.addLogoutHandler(logoutHandler()));
+    		
+    			
+    			
 		
     	http.authenticationProvider(authenticationProvider());
     	http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -69,6 +83,4 @@ public class SecurityConfig {
 		return http.build();
 	}
     
-    
-
 }

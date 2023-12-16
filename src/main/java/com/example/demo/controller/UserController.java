@@ -36,7 +36,7 @@ import com.example.demo.service.implementation.UserServiceImpl;
 
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class UserController {
     
 	private final AuthenticationManager authenticationManager;
@@ -49,7 +49,6 @@ public class UserController {
     
     private final RolelServiceImpl rolelServiceImpl;
    
-    
     private final ModelMapper modelMapper;
 
 	private final PasswordEncoder passwordEncoder;
@@ -94,7 +93,6 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterDto userRegisterDto){
 
     	try {
-    		
 //    		Check email if it already exists or not
     		if (userServiceImpl.findUserByEmail(userRegisterDto.getEmail())) {
     			return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
@@ -130,10 +128,14 @@ public class UserController {
 
     }
     
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(){
+    	return new ResponseEntity<>("Successfully logout!", HttpStatus.OK);  	
+    }
+    
     @GetMapping("/greetings")
     public ResponseEntity<?> greetings() {
     	return new ResponseEntity<>("Halo", HttpStatus.OK);
-		
 	}
-
+    
 }

@@ -5,12 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -18,7 +20,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
-@Service
+@Component
 public class JwtService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
@@ -45,11 +47,12 @@ public class JwtService {
 				.parseClaimsJws(token).getBody().getSubject();
 	}
 	
-	public boolean isTokenValid(String authToken) {
+	public boolean isTokenValid(String authToken, UserDetails uerDetails) {
 		try {
-			Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
-			
-			return true;
+			if (getUsernameFromJwtToken(authToken).equals(uerDetails.getUsername())) {
+				return true;
+			}
+//			Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
 		} catch (ExpiredJwtException e) {
 			logger.error("JWT token is expired: {}", e.getMessage());
 		} catch (UnsupportedJwtException e) {
@@ -59,10 +62,9 @@ public class JwtService {
 		} catch (IllegalArgumentException e) {
 			logger.error("JWT claims string is empty: {}", e.getMessage());
 		}
-		
 		return false;
 	}
-	
+
 	public Key key() {
 		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecretKey));
 	}

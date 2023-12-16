@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component; 	
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,60 +29,58 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 
-@Component
-@NoArgsConstructor(force = true)
+
 public class JwtAuthenticationFilter extends OncePerRequestFilter{
-	
-	private final JwtService jwtService;
-	
-	private final UserDetailServiceImpl userDetailServiceImpl;
-	
-	private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 	
 
 	@Autowired
-	public JwtAuthenticationFilter(JwtService jwtService, UserDetailServiceImpl userDetailServiceImpl) {
-		this.jwtService = jwtService;
-		this.userDetailServiceImpl = userDetailServiceImpl;
-	}
+	private JwtService jwtService;
 	
+	@Autowired
+	private UserDetailServiceImpl userDetailServiceImpl;
+	
+	private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+		
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		
 		try {
 			String jwt = parseJwt(request);
-			System.out.println("jwt : " + jwt);
-			System.out.println("jwtService.isTokenValid(jwt)" + jwtService.isTokenValid(jwt));
-			if (jwt != null && jwtService.isTokenValid(jwt)) {
-				/* get username from token */
-				
-				System.out.println("masuk if: " + jwt);
-				
-				String email = jwtService.getUsernameFromJwtToken(jwt);
-
-				UserDetails userDetails = userDetailServiceImpl.loadUserByUsername(email);
-				 
-				UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-				
-				auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				System.out.println("masuk doFilter: " + auth);
-				/* Set the authentication for the current context*/
-				SecurityContextHolder.getContext().setAuthentication(auth);				
+			if (request.getServletPath().contains("/api")) {
+				filterChain.doFilter(request, response);
+				return;
 			}
+				
+			String username = jwtService.getUsernameFromJwtToken(jwt);
+			System.out.println("username: " + username);
+			if (username != null) {
+				UserDetails userDetails = userDetailServiceImpl.loadUserByUsername(username);
+				
+				if (jwtService.isTokenValid(jwt, userDetails)) {
+					
+					UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+					
+					auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					
+					SecurityContextHolder.getContext().setAuthentication(auth);
+					
+				}
+			}
+						
+		}catch (UsernameNotFoundException e) {
+			logger.error("Error: {} ", e);
 		} catch (Exception e) {
-			logger.error("Can't set user authentication: " + e);
+			logger.error("{}", e);
 		}
 		filterChain.doFilter(request, response);
 	}
 	
 	private String parseJwt(HttpServletRequest request) {
 		String authHeader = request.getHeader("Authorization");
-		
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			return null;
 		}
-		return authHeader.substring(7);
+		return authHeader.split(" ")[1].trim();
 	}
-	
 }
