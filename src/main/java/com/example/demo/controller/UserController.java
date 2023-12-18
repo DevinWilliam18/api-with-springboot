@@ -80,6 +80,7 @@ public class UserController {
 			resultMap.put("token", jwtString);
 			resultMap.put("username", userDetails.getUsername());
 			
+			System.out.println("User: " + userDetails);
 			return new ResponseEntity<>(resultMap, HttpStatus.OK);
 			
 		} catch (BadCredentialsException e) {
