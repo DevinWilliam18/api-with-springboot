@@ -13,4 +13,7 @@ public interface UserService {
     boolean findUserByUsername(String username);
     
     boolean findUserByEmail(String email);
+    
+    User getUserByUsername(String username);
+    
 }

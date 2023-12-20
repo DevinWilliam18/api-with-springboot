@@ -37,9 +37,11 @@ public class DemoApplication{
 					Role role = new Role();
 					role.setName("ROLE_ADMIN");
 					roleRepository.save(role);
-
+					
 					System.out.println("Initial records loaded successfully.");
-				} catch (Exception e) {
+				
+            	
+            	} catch (Exception e) {
 					e.printStackTrace();
 				}
             }

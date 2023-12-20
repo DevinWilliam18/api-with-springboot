@@ -27,13 +27,14 @@ import com.example.demo.config.JwtAuthenticationFilter;
 import com.example.demo.dto.UserLoginDto;
 import com.example.demo.dto.UserRegisterDto;
 import com.example.demo.model.Role;
+import com.example.demo.model.Token;
 import com.example.demo.model.User;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.service.implementation.JwtService;
 import com.example.demo.service.implementation.RolelServiceImpl;
 import com.example.demo.service.implementation.UserDetailServiceImpl;
 import com.example.demo.service.implementation.UserServiceImpl;
-
+import com.example.demo.service.implementation.TokenServiceImpl;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -48,19 +49,22 @@ public class UserController {
     private final JwtService jwtService;
     
     private final RolelServiceImpl rolelServiceImpl;
-   
+
+    private final TokenServiceImpl tokenServiceImpl;
+    
     private final ModelMapper modelMapper;
 
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
 	public UserController(AuthenticationManager authenticationManager, UserDetailServiceImpl userDetailServiceImpl, RolelServiceImpl rolelServiceImpl,
-			ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtService jwtService, UserServiceImpl userServiceImpl) {
+			TokenServiceImpl tokenServiceImpl, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtService jwtService, UserServiceImpl userServiceImpl) {
 		this.authenticationManager = authenticationManager;
 		this.userServiceImpl = userServiceImpl;
 		this.userDetailServiceImpl = userDetailServiceImpl;
 		this.jwtService = jwtService;
 		this.rolelServiceImpl = rolelServiceImpl;
+		this.tokenServiceImpl = tokenServiceImpl;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
 	}
@@ -76,11 +80,21 @@ public class UserController {
 			//get user's info
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			
+			User user = userServiceImpl.getUserByUsername(userDetails.getUsername());
+			
+			Token token = Token.builder()
+					.token(jwtString)
+					.revoked(false)
+					.expired(false)
+					.user(user)
+					.build();
+			
+			tokenServiceImpl.saveToken(token);
+			
 			Map<String, String> resultMap = new HashMap<>();
 			resultMap.put("token", jwtString);
 			resultMap.put("username", userDetails.getUsername());
 			
-			System.out.println("User: " + userDetails);
 			return new ResponseEntity<>(resultMap, HttpStatus.OK);
 			
 		} catch (BadCredentialsException e) {
@@ -108,6 +122,7 @@ public class UserController {
 			
 			Role role = rolelServiceImpl.findRoleByName("ROLE_ADMIN");
 			
+
 			//encoding password before save into database
 			String password = passwordEncoder.encode(user.getPassword());
 
@@ -127,11 +142,6 @@ public class UserController {
     	
     	return new ResponseEntity<>("couldn't create user", HttpStatus.UNPROCESSABLE_ENTITY);
 
-    }
-    
-    @GetMapping("/logout")
-    public ResponseEntity<?> logout(){
-    	return new ResponseEntity<>("Successfully logout!", HttpStatus.OK);  	
     }
     
     @GetMapping("/greetings")

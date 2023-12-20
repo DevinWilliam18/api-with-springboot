@@ -20,7 +20,6 @@ public class UserServiceImpl implements UserService{
         this.userRepository = userRepository;
     }	
 	
-	
 	@Override
 	public boolean registerUser(User user) {
 		
@@ -57,6 +56,19 @@ public class UserServiceImpl implements UserService{
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public User getUserByUsername(String username) {
+		try {
+			User user = userRepository.findByName(username);
+			if (user != null) {
+				return user;
+			}
+		} catch (Exception e) {
+			System.out.println("error: " + e);
+		}
+		return null;
 	}
 
 }

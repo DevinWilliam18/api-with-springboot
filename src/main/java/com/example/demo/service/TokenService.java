@@ -4,7 +4,7 @@ import com.example.demo.model.Token;
 
 public interface TokenService {
     
-    Token getTokenById(Integer id);
+    Token getTokenByToken(String token);
 
     void saveToken(Token token);
 

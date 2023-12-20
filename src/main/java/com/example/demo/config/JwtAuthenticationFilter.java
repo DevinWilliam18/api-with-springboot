@@ -46,14 +46,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 			throws ServletException, IOException {
 		
 		try {
-			String jwt = parseJwt(request);
+			
 			if (request.getServletPath().contains("/api/auth/login") || request.getServletPath().contains("/api/auth/register")) {
 				filterChain.doFilter(request, response);
 				return;
 			}
-				
+			
+			String jwt = jwtService.parseJwt(request);
+			
 			String username = jwtService.getUsernameFromJwtToken(jwt);
-			System.out.println("username: " + username);
+			
 			if (username != null) {
 				UserDetails userDetails = userDetailServiceImpl.loadUserByUsername(username);
 				
@@ -69,18 +71,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 			}
 						
 		}catch (UsernameNotFoundException e) {
-			logger.error("Error: {} ", e);
+			logger.error("Username not found: {} ", e.getMessage());
 		} catch (Exception e) {
-			logger.error("{}", e);
+			logger.error("Error: {}", e.getMessage());
 		}
 		filterChain.doFilter(request, response);
 	}
 	
-	private String parseJwt(HttpServletRequest request) {
-		String authHeader = request.getHeader("Authorization");
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			return null;
-		}
-		return authHeader.split(" ")[1].trim();
-	}
+
 }

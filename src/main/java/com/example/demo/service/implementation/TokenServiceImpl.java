@@ -15,11 +15,10 @@ public class TokenServiceImpl implements TokenService{
     private final TokenRepository tokenRepository;
 
     @Override
-    public Token getTokenById(Integer id) {
+    public Token getTokenByToken(String token) {
         
-        Token token = tokenRepository.getById(id);
-
-        return token;
+        Token token_res = tokenRepository.findTokenByToken(token);
+        return token_res;
     }
 
     @Override

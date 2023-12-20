@@ -4,6 +4,7 @@ package com.example.demo.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -19,26 +20,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
 import com.example.demo.service.implementation.UserDetailServiceImpl;
 
+import lombok.RequiredArgsConstructor;
+
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
 
 	private final UserDetailServiceImpl userDetailServiceImpl;
-    
-	public SecurityConfig(UserDetailServiceImpl userDetailServiceImpl) {
-		this.userDetailServiceImpl = userDetailServiceImpl;
-	}
 
-	@Bean
-	public CustomConfigClass logoutHandler() {
-			return new CustomConfigClass();
-	}
-	
+	private final CustomConfigClass logoutHandler;
+
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
 		return new JwtAuthenticationFilter();
@@ -72,11 +69,11 @@ public class SecurityConfig {
     		.antMatchers("/api/auth/login", "/api/auth/register").permitAll()
     		.anyRequest().authenticated()
     		.and()
-    			.logout((logout) -> logout.addLogoutHandler(logoutHandler()));
+    			.logout((logout) -> logout
+    					.logoutUrl("/api/auth/logout")
+    					.addLogoutHandler(logoutHandler)
+    					.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)));
     		
-    			
-    			
-		
     	http.authenticationProvider(authenticationProvider());
     	http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     	

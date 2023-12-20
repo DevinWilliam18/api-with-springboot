@@ -8,5 +8,5 @@ import com.example.demo.model.Token;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, Integer>{
-    
+    Token findTokenByToken(String token);
 }
