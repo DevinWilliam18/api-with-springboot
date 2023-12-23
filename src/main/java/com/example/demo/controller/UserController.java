@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.context.Theme;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,9 @@ import com.example.demo.model.Role;
 import com.example.demo.model.Token;
 import com.example.demo.model.User;
 import com.example.demo.repository.RoleRepository;
+import com.example.demo.service.RoleService;
+import com.example.demo.service.TokenService;
+import com.example.demo.service.UserService;
 import com.example.demo.service.implementation.JwtService;
 import com.example.demo.service.implementation.RolelServiceImpl;
 import com.example.demo.service.implementation.UserDetailServiceImpl;
@@ -42,29 +46,31 @@ public class UserController {
     
 	private final AuthenticationManager authenticationManager;
 	
-	private final UserServiceImpl userServiceImpl;
+	private final UserService userService;
 	
-    private final UserDetailServiceImpl userDetailServiceImpl;
+	private final UserDetailsService userDetailsService;
     
     private final JwtService jwtService;
     
-    private final RolelServiceImpl rolelServiceImpl;
+    private final RoleService rolelService;
 
-    private final TokenServiceImpl tokenServiceImpl;
+    private final TokenService tokenService;
     
     private final ModelMapper modelMapper;
 
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public UserController(AuthenticationManager authenticationManager, UserDetailServiceImpl userDetailServiceImpl, RolelServiceImpl rolelServiceImpl,
-			TokenServiceImpl tokenServiceImpl, ModelMapper modelMapper, PasswordEncoder passwordEncoder, JwtService jwtService, UserServiceImpl userServiceImpl) {
+	public UserController(AuthenticationManager authenticationManager, UserService userService,
+			UserDetailsService userDetailsService, JwtService jwtService, RoleService rolelService,
+			TokenService tokenService, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
+
 		this.authenticationManager = authenticationManager;
-		this.userServiceImpl = userServiceImpl;
-		this.userDetailServiceImpl = userDetailServiceImpl;
+		this.userService = userService;
+		this.userDetailsService = userDetailsService;
 		this.jwtService = jwtService;
-		this.rolelServiceImpl = rolelServiceImpl;
-		this.tokenServiceImpl = tokenServiceImpl;
+		this.rolelService = rolelService;
+		this.tokenService = tokenService;
 		this.modelMapper = modelMapper;
 		this.passwordEncoder = passwordEncoder;
 	}
@@ -80,7 +86,7 @@ public class UserController {
 			//get user's info
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			
-			User user = userServiceImpl.getUserByUsername(userDetails.getUsername());
+			User user = userService.getUserByUsername(userDetails.getUsername());
 			
 			Token token = Token.builder()
 					.token(jwtString)
@@ -89,7 +95,7 @@ public class UserController {
 					.user(user)
 					.build();
 			
-			tokenServiceImpl.saveToken(token);
+			tokenService.saveToken(token);
 			
 			Map<String, String> resultMap = new HashMap<>();
 			resultMap.put("token", jwtString);
@@ -109,18 +115,18 @@ public class UserController {
 
     	try {
 //    		Check email if it already exists or not
-    		if (userServiceImpl.findUserByEmail(userRegisterDto.getEmail())) {
+    		if (userService.findUserByEmail(userRegisterDto.getEmail())) {
     			return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
 			}
     		
 //    		Check username if it already exists or not    		
-    		if (userServiceImpl.findUserByUsername(userRegisterDto.getName())) {
+    		if (userService.findUserByUsername(userRegisterDto.getName())) {
     			return new ResponseEntity<>("Username already exists", HttpStatus.BAD_REQUEST);				
 			}
     		
 			User user = modelMapper.map(userRegisterDto, User.class);
 			
-			Role role = rolelServiceImpl.findRoleByName("ROLE_ADMIN");
+			Role role = rolelService.findRoleByName("ROLE_ADMIN");
 			
 
 			//encoding password before save into database
@@ -131,7 +137,7 @@ public class UserController {
 			//save the entity into database
 			user.setRoles(Collections.singleton(role));
 			
-			if (userServiceImpl.registerUser(user)) {
+			if (userService.registerUser(user)) {
 				System.out.println("registration");
 				return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
 			}
@@ -144,9 +150,9 @@ public class UserController {
 
     }
     
-    @GetMapping("/greetings")
+    @GetMapping("/successful-logout")
     public ResponseEntity<?> greetings() {
-    	return new ResponseEntity<>("Halo", HttpStatus.OK);
+    	return new ResponseEntity<>("Logout successfully", HttpStatus.OK);
 	}
     
 }

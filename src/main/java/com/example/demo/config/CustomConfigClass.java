@@ -32,7 +32,6 @@ public class CustomConfigClass implements LogoutHandler{
 			final String authHeader = request.getHeader("Authorization");
 			final String jwt = authHeader.split(" ")[1].trim();
 			
-			System.out.println("jwt_logout: " + jwt);
 			
 		    if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
 		        return;

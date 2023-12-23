@@ -36,10 +36,12 @@ public class SecurityConfig {
 
 	private final CustomConfigClass logoutHandler;
 
+	
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
 		return new JwtAuthenticationFilter();
 	}
+	
 	
     @Bean
 	public DaoAuthenticationProvider authenticationProvider() {
@@ -72,8 +74,8 @@ public class SecurityConfig {
     			.logout((logout) -> logout
     					.logoutUrl("/api/auth/logout")
     					.addLogoutHandler(logoutHandler)
-    					.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)));
-    		
+    					.logoutSuccessUrl("/api/auth/successful-logout"));
+    			
     	http.authenticationProvider(authenticationProvider());
     	http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     	
