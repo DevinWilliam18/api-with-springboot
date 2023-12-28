@@ -20,10 +20,13 @@ import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import lombok.Builder;
 
+
+@Builder
 @Entity
 @Table(name = "users")
-public class User{
+public class User {
 	
 	@Id
     @Column(name = "user_id")
