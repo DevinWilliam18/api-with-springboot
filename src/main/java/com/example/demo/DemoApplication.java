@@ -27,26 +27,26 @@ public class DemoApplication{
         return new ModelMapper();
     }
     
-    @Bean
-    public ApplicationRunner initData(RoleRepository roleRepository) {
-        return new ApplicationRunner() {
-            @Override
-            public void run(ApplicationArguments args) throws Exception {
-        		
-            	try {
-					Role role = new Role();
-					role.setName("ROLE_ADMIN");
-					roleRepository.save(role);
-					
-					System.out.println("Initial records loaded successfully.");
-				
-            	
-            	} catch (Exception e) {
-					e.printStackTrace();
-				}
-            }
-        };
-    }
+//    @Bean
+//    public ApplicationRunner initData(RoleRepository roleRepository) {
+//        return new ApplicationRunner() {
+//            @Override
+//            public void run(ApplicationArguments args) throws Exception {
+//        		
+//            	try {
+//					Role role = new Role();
+//					role.setName("ROLE_ADMIN");
+//					roleRepository.save(role);
+//					
+//					System.out.println("Initial records loaded successfully.");
+//				
+//            	
+//            	} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//            }
+//        };
+//    }
     
 //    @Bean
 //    public ApplicationRunner getBeans(ApplicationContext applicationContext) {

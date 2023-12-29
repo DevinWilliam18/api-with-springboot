@@ -2,6 +2,7 @@ package com.example.demo.repository;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 
@@ -29,26 +30,38 @@ public class UserRepositoryTest {
                 .email("devinfcb42@gmail.com")
                 .password("dvn_2023")
                 .build();
+        
     }
 
-
     @Test
+    @DisplayName(value = "JUnit test for checking user by email")
     void testExistsByEmail() {
-
+    	userRepository.save(user);
+    	
+    	assertTrue(userRepository.existsByEmail(user.getEmail()));
     }
 
     @Test
+    @DisplayName(value = "JUnit test for checking user by name")
     void testExistsByName() {
-
+    	userRepository.save(user);
+    	
+    	assertTrue(userRepository.existsByName(user.getName()));
+    	
     }
 
     @Test
+    @DisplayName(value = "JUnit test for retrieving user by name")
     void testFindByName() {
-
+    	userRepository.save(user);
+    	User response = userRepository.findByName(user.getName());
+    	
+    	assertEquals(response.getName(), user.getName());
+    	
     }
 
     @Test
-    @DisplayName(value = "jUnit test for saving employee")
+    @DisplayName(value = "jUnit test for saving user")
     void testSave() {
         //when
         User saveUser = userRepository.save(user);
