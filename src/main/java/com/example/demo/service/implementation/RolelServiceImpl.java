@@ -32,7 +32,7 @@ public class RolelServiceImpl implements RoleService{
 			roleRepository.save(role);
 			return true;
 		} catch (Exception e) {
-			System.out.println("RolelServiceImpl: " + e);
+			System.out.println("RolelServiceImpl: " + e.getMessage());
 			System.out.println("couldn't create the data");
 		}
 		return false;

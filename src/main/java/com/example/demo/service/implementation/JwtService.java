@@ -23,7 +23,9 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.WeakKeyException;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -40,15 +42,19 @@ public class JwtService {
 	
 	private final TokenServiceImpl tokenServiceImpl;
 	
-	public String generateToken(Authentication authentication) {
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		
-		return Jwts.builder()
-				.setSubject(userDetails.getUsername())
-				.setIssuedAt(new Date())
-				.setExpiration(new Date(new Date().getTime() + jwtExpiration))
-				.signWith(key(), SignatureAlgorithm.HS256)
-				.compact();
+	public String generateToken(String username) {
+		try {
+			logger.info("jwtExpiration: {}", jwtExpiration);
+			return Jwts.builder()
+					.setSubject(username)
+					.setIssuedAt(new Date())
+					.setExpiration(new Date(new Date().getTime() + jwtExpiration))
+					.signWith(key(), SignatureAlgorithm.HS256)
+					.compact();			
+		} catch (Exception e) {
+			logger.error("{}", e.getMessage());
+		}
+		return null;
 	}
 
 	public String getUsernameFromJwtToken(String token) {
@@ -108,7 +114,15 @@ public class JwtService {
 	}
 	
 	public Key key() {
-		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecretKey));
+		try {
+			return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecretKey));
+		} catch (WeakKeyException e) {
+			logger.error("{}", e);
+			e.printStackTrace();
+		} catch (DecodingException e) {
+			logger.error("{}", e);
+		}
+		return null;
 	}
 
 }

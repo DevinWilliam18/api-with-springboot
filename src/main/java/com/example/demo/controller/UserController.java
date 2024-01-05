@@ -81,7 +81,7 @@ public class UserController {
 			Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userLoginDto.getUsername(), userLoginDto.getPassword()));
 			
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			String jwtString = jwtService.generateToken(authentication);
+			String jwtString = jwtService.generateToken(userLoginDto.getUsername());
 			
 			//get user's info
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();

@@ -1,6 +1,9 @@
 package com.example.demo.service.implementation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -68,15 +71,18 @@ public class UserServiceImplTest {
 
     @Test
     void testRegisterUser() {
-        User savedUser = User
-                .builder()
-                .name("gogo")
-                .email("gogo42@gmail.com")
-                .password("2212")
-                .build();
-
-        when(userRepository.save(savedUser))
+        User savedUser = User.builder().name("gogo").email("gogo42@gmail.com").password("22124").build();
         
-         
+        
+        when(userRepository.save(savedUser)).thenReturn(savedUser);
+        
+        
+        boolean result = userServiceImpl.registerUser(savedUser);
+        
+        assertEquals(true, result);
+        
+        	
+        verify(userRepository, times(1)).save(savedUser);
+        
     }
 }
