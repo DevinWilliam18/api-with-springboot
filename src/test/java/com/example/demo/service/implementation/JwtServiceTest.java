@@ -1,5 +1,6 @@
 package com.example.demo.service.implementation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +28,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.demo.model.Role;
 import com.example.demo.model.User;
@@ -54,14 +56,19 @@ public class JwtServiceTest {
 				.password("vins1234")
 				.roles(roles)
 				.build();
+
+        // fil methods inside the JwtService class with a value for testing
+        ReflectionTestUtils.setField(jwtService, "jwtSecretKey", "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970");
+
+        // fil methods inside the JwtService class with a value for testing
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 86400000);                
 		
 	}
 	
     @Test
     void testGenerateToken() {
-    	
-    	String accessToken = jwtService.generateToken(user.getName());
-    	System.out.println("accessToken: " + accessToken);
+
+        String accessToken = jwtService.generateToken(user.getName());
     	
     	assertNotNull(accessToken);
 
@@ -70,6 +77,11 @@ public class JwtServiceTest {
     @Test
     void testGetUsernameFromJwtToken() {
 
+        String accessToken = jwtService.generateToken(user.getName());
+
+        String username = jwtService.getUsernameFromJwtToken(accessToken);
+
+        assertEquals(user.getName(), username);
     }
 
     @Test
