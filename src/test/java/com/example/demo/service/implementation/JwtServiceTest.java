@@ -59,12 +59,11 @@ public class JwtServiceTest {
 	
     @Test
     void testGenerateToken() {
-    	
-    	String accessToken = jwtService.generateToken(user.getName());
-    	System.out.println("accessToken: " + accessToken);
-    	
-    	assertNotNull(accessToken);
 
+    	String accessToken = jwtService.generateToken(user.getName());
+
+    	assertNotNull(accessToken);
+    	
     }
 
     @Test
