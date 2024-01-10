@@ -79,6 +79,7 @@ public class UserServiceImplTest {
         
         boolean result = userServiceImpl.registerUser(savedUser);
         
+        
         assertEquals(true, result);
         
         	

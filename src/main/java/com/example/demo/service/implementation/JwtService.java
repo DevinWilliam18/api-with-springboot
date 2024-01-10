@@ -68,9 +68,10 @@ public class JwtService {
 		return null;
 	}
 	
-	public boolean isTokenValid(String authToken, UserDetails uerDetails) {
+	public boolean isTokenValid(String authToken, String username) {
+		
 		try {
-			if (getUsernameFromJwtToken(authToken).equals(uerDetails.getUsername()) && !isExpired(authToken)) {
+			if (getUsernameFromJwtToken(authToken).equals(username) && !isExpired(authToken)) {
 				return true;
 			}
 //			Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
@@ -82,14 +83,20 @@ public class JwtService {
 			logger.error("Invalid JWT token: {}", e.getMessage());
 		} catch (IllegalArgumentException e) {
 			logger.error("JWT claims string is empty: {}", e.getMessage());
+		}catch (Exception e) {
+			logger.error("{}", e.getMessage());
 		}
 		return false;
 	}
 	
 	public boolean isExpired(String authToken) {
-		Token token =  tokenServiceImpl.getTokenByToken(authToken);
-		if (!token.isExpired() && ! token.isRevoked()) {
-			return false;
+		try {
+			Token token =  tokenServiceImpl.getTokenByToken(authToken);
+			if (!token.isExpired() && ! token.isRevoked()) {
+				return false;
+			}
+		} catch (Exception e) {
+			logger.error("{}", e.getMessage());
 		}
 		return true;
 	}
