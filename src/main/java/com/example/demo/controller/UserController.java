@@ -112,8 +112,8 @@ public class UserController {
     
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterDto userRegisterDto){
-
     	try {
+
 //    		Check email if it already exists or not
     		if (userService.findUserByEmail(userRegisterDto.getEmail())) {
     			return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
@@ -124,28 +124,26 @@ public class UserController {
     			return new ResponseEntity<>("Username already exists", HttpStatus.BAD_REQUEST);				
 			}
     		
+    		
 			User user = modelMapper.map(userRegisterDto, User.class);
 			
 			Role role = rolelService.findRoleByName("ROLE_ADMIN");
-			
 
 			//encoding password before save into database
 			String password = passwordEncoder.encode(user.getPassword());
-
+	
 			user.setPassword(password);
 
+			
 			//save the entity into database
 			user.setRoles(Collections.singleton(role));
-			
+
 			if (userService.registerUser(user)) {
-				System.out.println("registration");
 				return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Register: " + e.getMessage());
 		}
-    	
     	return new ResponseEntity<>("couldn't create user", HttpStatus.UNPROCESSABLE_ENTITY);
 
     }

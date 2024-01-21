@@ -1,6 +1,8 @@
 package com.example.demo.dto;
 
+import lombok.Builder;
 
+@Builder
 public class UserRegisterDto {
     
     private String name;
@@ -10,9 +12,6 @@ public class UserRegisterDto {
     private String password;
 
 
-	public UserRegisterDto() {
-		
-	}
 
 	public String getName() {
 		return name;
