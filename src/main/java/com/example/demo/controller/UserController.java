@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.hibernate.query.criteria.internal.predicate.ExistsPredicate;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +62,8 @@ public class UserController {
 
 	private final PasswordEncoder passwordEncoder;
 
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+	
 	@Autowired
 	public UserController(AuthenticationManager authenticationManager, UserService userService,
 			UserDetailsService userDetailsService, JwtService jwtService, RoleService rolelService,
@@ -83,10 +87,11 @@ public class UserController {
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String jwtString = jwtService.generateToken(userLoginDto.getUsername());
 			
-			//get user's info
-			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			
-			User user = userService.getUserByUsername(userDetails.getUsername());
+			//get user's info
+			String username = (String) authentication.getPrincipal();
+			
+			User user = userService.getUserByUsername(username);
 			
 			Token token = Token.builder()
 					.token(jwtString)
@@ -94,18 +99,20 @@ public class UserController {
 					.expired(false)
 					.user(user)
 					.build();
-			
+
 			tokenService.saveToken(token);
 			
 			Map<String, String> resultMap = new HashMap<>();
 			resultMap.put("token", jwtString);
-			resultMap.put("username", userDetails.getUsername());
+			resultMap.put("username", username);
 			
 			return new ResponseEntity<>(resultMap, HttpStatus.OK);
 			
 		} catch (BadCredentialsException e) {
+			logger.error("BadCredentialsException: {}", e.getMessage());
 			return new ResponseEntity<>("incorrect password and username!", HttpStatus.UNAUTHORIZED);
 		}catch (Exception e) {
+			logger.error("Exception:  {}", e.getMessage());
 			return new ResponseEntity<>("couldn't login", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
