@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.ApplicationArguments;
@@ -19,7 +20,8 @@ import com.example.demo.repository.RoleRepository;
 public class DemoApplication{
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		ApplicationContext applicationContext = SpringApplication.run(DemoApplication.class, args);
+		System.out.println("Type of an object: " + applicationContext.getClass().getName());
 	}
 
     @Bean
@@ -27,26 +29,26 @@ public class DemoApplication{
         return new ModelMapper();
     }
     
-//    @Bean
-//    public ApplicationRunner initData(RoleRepository roleRepository) {
-//        return new ApplicationRunner() {
-//            @Override
-//            public void run(ApplicationArguments args) throws Exception {
-//        		
-//            	try {
-//					Role role = new Role();
-//					role.setName("ROLE_ADMIN");
-//					roleRepository.save(role);
-//					
-//					System.out.println("Initial records loaded successfully.");
-//				
-//            	
-//            	} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//            }
-//        };
-//    }
+   @Bean
+   public ApplicationRunner initData(RoleRepository roleRepository) {
+       return new ApplicationRunner() {
+           @Override
+           public void run(ApplicationArguments args) throws Exception {
+       		
+           	try {
+					Role role = new Role();
+					role.setName("ROLE_ADMIN");
+					roleRepository.save(role);
+					
+					System.out.println("Initial records loaded successfully.");
+				
+           	
+           	} catch (Exception e) {
+					e.printStackTrace();
+				}
+           }
+       };
+   }
     
 //    @Bean
 //    public ApplicationRunner getBeans(ApplicationContext applicationContext) {

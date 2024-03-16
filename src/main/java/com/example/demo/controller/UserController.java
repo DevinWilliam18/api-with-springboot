@@ -87,11 +87,15 @@ public class UserController {
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String jwtString = jwtService.generateToken(userLoginDto.getUsername());
 			
-			
+			logger.info("auth-principal: {}", authentication.getPrincipal());
+			logger.info("auth-credentials: {}", authentication.getCredentials());
+			logger.info("auth-authorities: {}", authentication.getAuthorities());			
+			logger.info("auth-details: {}", authentication.getDetails());
+
 			//get user's info
-			String username = (String) authentication.getPrincipal();
+
 			
-			User user = userService.getUserByUsername(username);
+			User user = userService.getUserByUsername(userLoginDto.getUsername());
 			
 			Token token = Token.builder()
 					.token(jwtString)
@@ -104,7 +108,7 @@ public class UserController {
 			
 			Map<String, String> resultMap = new HashMap<>();
 			resultMap.put("token", jwtString);
-			resultMap.put("username", username);
+			resultMap.put("username", user.getName());
 			
 			return new ResponseEntity<>(resultMap, HttpStatus.OK);
 			
